@@ -24,7 +24,7 @@ export default function RecceDetail({ asset, onClose, onMap, onUnlink }) {
       {safeURL(asset.image) && <a className="file-link" href={safeURL(asset.image)} target="_blank" rel="noopener noreferrer">Open original recce image ↗</a>}
     </div><div><h2>Recce specifications</h2>
       {asset.entries.map((photo, index) => <section className="spec-entry" key={photo.id}><h3>Entry {index + 1}</h3>
-        <dl className="details-list">{[['Material', photo.material], ['Dimensions', dimensions(photo)], ['Store', photo.store_name], ['Store owner', photo.store_owner_name], ['Contact', photo.store_owner_mobile]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value || 'Not specified'}</dd></div>)}</dl>
+        <dl className="details-list">{[['Material', photo.material], ['Collateral', photo.collateral], ['Dimensions', dimensions(photo)], ['Store', photo.store_name], ['Store owner', photo.store_owner_name], ['Contact', photo.store_owner_mobile]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value || 'Not specified'}</dd></div>)}</dl>
         <p className="notes">{photo.notes}</p>
       </section>)}
     </div></div>
