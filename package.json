@@ -1,0 +1,15 @@
+{
+  "name": "norrvex_bucket",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3100",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 3100",
+    "test": "node --test tests/*.test.js",
+    "test:production": "node tests/production-smoke.mjs"
+  },
+  "dependencies": { "next": "^16.0.0", "react": "^19.2.0", "react-dom": "^19.2.0" },
+  "engines": { "node": ">=20.9.0" }
+}
