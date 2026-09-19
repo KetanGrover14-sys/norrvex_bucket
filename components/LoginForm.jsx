@@ -33,6 +33,8 @@ export default function LoginForm() {
         <label className="full">Password<input name="password" type="password" autoComplete="current-password" required placeholder="Your existing password" /></label>
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
+
+      
       <button className="primary" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in to your repository ↗'}</button>
     </form>
     <p className="login-footnote">One account. The same recce data across both websites.</p>
