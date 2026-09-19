@@ -27,10 +27,9 @@ export default function LoginForm() {
     <Brand />
     <div className="eyebrow">RECCE → INSTALLATION</div>
     <h1>Your work, connected<span>.</span></h1>
-    <p>Sign in with your <strong>wecapurred_rr</strong> account to see your recce images, specifications, and mapped installations.</p>
     <form onSubmit={signIn}>
       <div className="form-grid">
-        <label className="full">Email<input name="email" type="email" autoComplete="username" required placeholder="Your wecapurred_rr email" /></label>
+        <label className="full">Email<input name="email" type="email" autoComplete="username" required placeholder="Your Email" /></label>
         <label className="full">Password<input name="password" type="password" autoComplete="current-password" required placeholder="Your existing password" /></label>
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
