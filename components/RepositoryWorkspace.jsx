@@ -45,7 +45,7 @@ export default function RepositoryWorkspace({ user, view }) {
     try {
       const result = await api('/api/repository');
       if (generation.current !== version) return;
-      if (!['projects', 'photos', 'files', 'mappings'].every(key => Array.isArray(result[key]))) throw new Error('The repository response is incomplete. Update the wecapurred_rr backend.');
+      if (!['projects', 'photos', 'files', 'mappings'].every(key => Array.isArray(result[key]))) throw new Error('The repository response is incomplete. Update the Norrvex Partners backend.');
       setData(result);
       setProjectId(previous => result.projects.some(project => project.id === previous) ? previous : 'all');
       setSyncedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -98,17 +98,17 @@ export default function RepositoryWorkspace({ user, view }) {
     (status === 'all' || (asset.installations.length ? 'mapped' : 'unmapped') === status) &&
     [asset.title, asset.location, asset.project.name, asset.project.client_name, ...asset.entries.flatMap(photo => [photo.material, photo.collateral, photo.notes, photo.store_name])].join(' ').toLowerCase().includes(search));
   const title = isInstallations ? 'Installation mapping' : 'Recce repository';
-  const stats = [[assets.length, 'Recce images', 'From your projects', '▧'], [assets.filter(asset => asset.installations.length).length, 'Installation linked', 'Connected to recce', '↗'], [data.projects.length, 'Projects', 'Shared with wecapurred_rr', '⌘']];
+  const stats = [[assets.length, 'Recce images', 'From your projects', '▧'], [assets.filter(asset => asset.installations.length).length, 'Installation linked', 'Connected to recce', '↗'], [data.projects.length, 'Projects', 'Shared with Norrvex Partners', '⌘']];
 
   return <>
-    <aside className="sidebar"><Brand /><div className="workspace"><span className="workspace-icon">{(user.name || 'N')[0]}</span><div>{user.name || user.email}<small>{user.role === 'admin' ? 'Admin · All projects' : 'Your wecapurred_rr projects'}</small></div></div>
+    <aside className="sidebar"><Brand /><div className="workspace"><span className="workspace-icon">{(user.name || 'N')[0]}</span><div>{user.name || user.email}<small>{user.role === 'admin' ? 'Admin · All projects' : 'Your Norrvex Partners projects'}</small></div></div>
       <p className="nav-label">WORKSPACE</p><nav aria-label="Workspace navigation">
         <Link className={`nav ${!isInstallations ? 'active' : ''}`} href="/repository" aria-current={!isInstallations ? 'page' : undefined}><span aria-hidden="true">▦</span>Recce repository <b>{assets.length}</b></Link>
         <Link className={`nav ${isInstallations ? 'active' : ''}`} href="/installations" aria-current={isInstallations ? 'page' : undefined}><span aria-hidden="true">⌘</span>Installation mapping</Link>
-      </nav><div className="sidebar-bottom"><span className="status-dot" />Shared repository<small>Source: wecapurred_rr</small><button className="export" onClick={signOut} disabled={signingOut}>Sign out ↗</button></div>
+      </nav><div className="sidebar-bottom"><span className="status-dot" />Shared repository<small>Source: Norrvex Partners</small><button className="export" onClick={signOut} disabled={signingOut}>Sign out ↗</button></div>
     </aside>
     <div className="main"><header><span>Workspace <span className="slash">/</span> <b>{title}</b></span><div className="header-account"><span className="account-email">{user.email}</span><button className="secondary mobile-logout" onClick={signOut} disabled={signingOut}>Sign out</button><span className="avatar">{(user.name || user.email).slice(0, 2).toUpperCase()}</span></div></header>
-      <main><div className="heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>{title}<span>.</span></h1><p>Your recce images from wecapurred_rr, connected to the finished installation.</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
+      <main><div className="heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>{title}<span>.</span></h1><p>Your recce images from Norrvex Partners, connected to the finished installation.</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="stats">{stats.map(([number, label, detail, icon]) => <div className="stat" key={label}><div><p>{label}</p><strong>{String(number).padStart(2, '0')}</strong><small>{detail}</small></div><span className="stat-icon" aria-hidden="true">{icon}</span></div>)}</div>
         <section className="collection"><div className="collection-heading"><div><h2>{isInstallations ? 'Recce with linked installations' : 'All recce images'} <span>{visible.length}</span></h2><p>Original images and specifications, shared directly from your projects.</p></div><span className="view-label">▦ &nbsp; Gallery view</span></div>
@@ -121,9 +121,9 @@ export default function RepositoryWorkspace({ user, view }) {
               <div className="card-image"><AssetImage src={asset.image} alt={asset.title} />{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].map(collateral => <span key={collateral} style={{ position: 'absolute', top: 10, left: 10, background: '#fff', color: '#285b46', borderRadius: 6, padding: '5px 8px', fontSize: 11, fontWeight: 700, boxShadow: '0 2px 8px #20302020' }}>{collateral}</span>)}<span className={`badge ${asset.installations.length ? 'installed' : ''}`}>{asset.installations.length ? '● Installation linked' : '○ Not mapped'}</span></div>
               <div className="card-body"><span className="card-type">{asset.project.name}</span><h3>{asset.title}</h3><div className="spec-line"><span>Material</span><span>{[...new Set(asset.entries.map(photo => photo.material).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Collateral</span><span>{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Specifications</span><span>{asset.entries.length} {asset.entries.length === 1 ? 'entry' : 'entries'}</span></div><div className="card-footer"><span>⌖ {asset.location || asset.project.client_name || 'Location not specified'}</span><span>View details ↗</span></div></div>
             </button>)}
-            {!visible.length && <div className="empty"><h3>{loading ? 'Loading your recce…' : error ? 'Unable to load your recce' : isInstallations ? 'No matching installation mappings' : 'No matching recce images'}</h3><p>{loading ? 'Fetching your shared project records.' : error ? 'Check the connection and use Refresh recce to retry.' : isInstallations ? 'Open a recce image and link an installation file from the same project.' : 'Recce captured in wecapurred_rr under your account will appear here. Refresh after adding recce, or adjust your filters.'}</p></div>}
+            {!visible.length && <div className="empty"><h3>{loading ? 'Loading your recce…' : error ? 'Unable to load your recce' : isInstallations ? 'No matching installation mappings' : 'No matching recce images'}</h3><p>{loading ? 'Fetching your shared project records.' : error ? 'Check the connection and use Refresh recce to retry.' : isInstallations ? 'Open a recce image and link an installation file from the same project.' : 'Recce captured in Norrvex Partners under your account will appear here. Refresh after adding recce, or adjust your filters.'}</p></div>}
           </div>
-        </section><footer><span>norrvex_bucket <span className="footer-dot">•</span> Recce to reality.</span><span>{loading ? 'Syncing…' : error ? 'Sync failed' : `Synced ${syncedAt}`} · Source: wecapurred_rr</span></footer>
+        </section><footer><span>norrvex_bucket <span className="footer-dot">•</span> Recce to reality.</span><span>{loading ? 'Syncing…' : error ? 'Sync failed' : `Synced ${syncedAt}`} · Source: Norrvex Partners</span></footer>
       </main>
     </div>
     {selected && <RecceDetail asset={selected} onClose={() => setSelectedId(null)} onMap={() => setMapping(true)} onUnlink={unlink} />}

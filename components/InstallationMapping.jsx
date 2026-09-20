@@ -37,7 +37,7 @@ export default function InstallationMapping({ asset, data, user, onClose, onSave
           {files.map(file => <option key={file.id} value={file.id}>{file.file_name} · {file.status || 'pending'}</option>)}
         </select></label>
       </div>
-      <p>Files and mappings are saved in the shared wecapurred_rr repository.</p>
+      <p>Files and mappings are saved in the shared Norrvex Partners repository.</p>
       {user.role === 'admin' && <div><label className="upload"><strong>Or upload a new installation image</strong><span>JPEG, PNG, WebP or GIF · maximum 15 MB</span><input ref={input} disabled={!!busy} type="file" accept="image/jpeg,image/png,image/webp,image/gif" /></label>
         <button type="button" className="secondary" disabled={!!busy} onClick={upload}>{busy === 'upload' ? 'Uploading…' : 'Upload to this project'}</button>
         <p>Upload first, then save the mapping to link it to the recce entry.</p>
