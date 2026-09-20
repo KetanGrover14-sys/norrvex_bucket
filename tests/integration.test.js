@@ -64,5 +64,5 @@ test('grouping ignores orphan mappings and invalid image links',()=>{
 
 test('unavailable upstream produces a clear connection error',async t=>{
   const unused=http.createServer();const unavailable=await listen(unused);await close(unused);const bucket=createServer({upstream:unavailable});const base=await listen(bucket);t.after(()=>close(bucket));
-  const response=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'vivek@example.test',password:'test'})});assert.equal(response.status,502);assert.match((await response.json()).error,/wecapurred_rr/);
+  const response=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'vivek@example.test',password:'test'})});assert.equal(response.status,502);assert.match((await response.json()).error,/WECAPURRED_URL/);
 });
