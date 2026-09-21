@@ -129,7 +129,7 @@ export default function RepositoryWorkspace({ user, view, activeProjectId = null
             {!visible.length && <div className="empty"><h3>{loading ? 'Loading your recce…' : error ? 'Unable to load your recce' : isInstallations ? 'No matching installation mappings' : 'No matching recce images'}</h3><p>{loading ? 'Fetching your shared project records.' : error ? 'Check the connection and use Refresh recce to retry.' : isInstallations ? 'Open a recce image and link an installation file from the same project.' : 'Recce captured in Norrvex Partners under your account will appear here. Refresh after adding recce, or adjust your filters.'}</p></div>}
           </div>
           </>}
-        </section><footer><span>norrvex_bucket <span className="footer-dot">•</span> Recce to reality.</span><span>{loading ? 'Syncing…' : error ? 'Sync failed' : `Synced ${syncedAt}`} · Source: Norrvex Partners</span></footer>
+        </section><footer><div className="footer-brand"><Brand compact /><span>Bucket · Recce to reality.</span></div><span>{loading ? 'Syncing…' : error ? 'Sync failed' : `Synced ${syncedAt}`} · Source: Norrvex Partners</span></footer>
       </main>
     </div>
     {selected && <RecceDetail asset={selected} onClose={() => setSelectedId(null)} onMap={() => setMapping(true)} onUnlink={unlink} />}
