@@ -64,6 +64,11 @@ try {
   assert.equal(recce.photos[0].material, 'Brass');
   const gallery = await (await fetch(`${base}/repository`, { headers })).text();
   assert.match(gallery, /Vivek/); assert.match(gallery, /Recce repository/);
+  assert.match(gallery, /Your projects/);
+  assert.match(gallery, /Search projects/);
+  const projectPage = await (await fetch(`${base}/repository/p1`, { headers })).text();
+  assert.match(projectPage, /Project recce images/);
+  assert.match(projectPage, /All projects/);
   const installations = await (await fetch(`${base}/installations`, { headers })).text();
   assert.match(installations, /Recce with linked installations/);
   const upload = await fetch(`${base}/api/projects/p1/files`, { method: 'POST', headers }); assert.equal(upload.status, 403);

@@ -7,12 +7,13 @@ import Brand from './Brand';
 import AssetImage from './AssetImage';
 import RecceDetail from './RecceDetail';
 import InstallationMapping from './InstallationMapping';
+import ProjectGrid from './ProjectGrid';
 import { groupRepository } from '@/lib/repository';
 import { api, jsonOptions } from '@/lib/client-api';
 
 const empty = { projects: [], photos: [], files: [], mappings: [] };
 
-export default function RepositoryWorkspace({ user, view }) {
+export default function RepositoryWorkspace({ user, view, activeProjectId = null }) {
   const router = useRouter();
   const [data, setData] = useState(empty);
   const [loading, setLoading] = useState(true);
@@ -27,8 +28,11 @@ export default function RepositoryWorkspace({ user, view }) {
   const [signingOut, setSigningOut] = useState(false);
   const generation = useRef(0);
   const isInstallations = view === 'installations';
+  const showProjects = !isInstallations && !activeProjectId;
   const assets = useMemo(() => groupRepository(data), [data]);
-  const selected = assets.find(asset => asset.id === selectedId);
+  const project = data.projects.find(project => project.id === activeProjectId);
+  const scopedAssets = activeProjectId ? assets.filter(asset => asset.project.id === activeProjectId) : assets;
+  const selected = scopedAssets.find(asset => asset.id === selectedId);
 
   const handleError = useCallback(error => {
     if (error.status === 401) {
@@ -93,12 +97,12 @@ export default function RepositoryWorkspace({ user, view }) {
   }
 
   const search = query.trim().toLowerCase();
-  const visible = assets.filter(asset => (!isInstallations || asset.installations.length) &&
-    (projectId === 'all' || asset.project.id === projectId) &&
+  const visible = scopedAssets.filter(asset => (!isInstallations || asset.installations.length) &&
+    (activeProjectId || projectId === 'all' || asset.project.id === projectId) &&
     (status === 'all' || (asset.installations.length ? 'mapped' : 'unmapped') === status) &&
     [asset.title, asset.location, asset.project.name, asset.project.client_name, ...asset.entries.flatMap(photo => [photo.material, photo.collateral, photo.notes, photo.store_name])].join(' ').toLowerCase().includes(search));
-  const title = isInstallations ? 'Installation mapping' : 'Recce repository';
-  const stats = [[assets.length, 'Recce images', 'From your projects', '▧'], [assets.filter(asset => asset.installations.length).length, 'Installation linked', 'Connected to recce', '↗'], [data.projects.length, 'Projects', 'Shared with Norrvex Partners', '⌘']];
+  const title = showProjects ? 'Your projects' : activeProjectId ? (project?.name || (loading ? 'Loading project' : 'Project unavailable')) : 'Installation mapping';
+  const stats = [[scopedAssets.length, 'Recce images', activeProjectId ? 'In this project' : 'From your projects', '▧'], [scopedAssets.filter(asset => asset.installations.length).length, 'Installation linked', 'Connected to recce', '↗'], [activeProjectId ? (project ? 1 : 0) : data.projects.length, 'Projects', 'Shared with Norrvex Partners', '⌘']];
 
   return <>
     <aside className="sidebar"><Brand /><div className="workspace"><span className="workspace-icon">{(user.name || 'N')[0]}</span><div>{user.name || user.email}<small>{user.role === 'admin' ? 'Admin · All projects' : 'Your Norrvex Partners projects'}</small></div></div>
@@ -108,14 +112,15 @@ export default function RepositoryWorkspace({ user, view }) {
       </nav><div className="sidebar-bottom"><span className="status-dot" />Shared repository<small>Source: Norrvex Partners</small><button className="export" onClick={signOut} disabled={signingOut}>Sign out ↗</button></div>
     </aside>
     <div className="main"><header><span>Workspace <span className="slash">/</span> <b>{title}</b></span><div className="header-account"><span className="account-email">{user.email}</span><button className="secondary mobile-logout" onClick={signOut} disabled={signingOut}>Sign out</button><span className="avatar">{(user.name || user.email).slice(0, 2).toUpperCase()}</span></div></header>
-      <main><div className="heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>{title}<span>.</span></h1><p>Your recce images from Norrvex Partners, connected to the finished installation.</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
+      <main>{activeProjectId && <Link className="back-to-projects" href="/repository">← All projects</Link>}<div className="heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>{title}<span>.</span></h1><p>{showProjects ? 'Choose a project to view its recce images, specifications, and installations.' : activeProjectId ? (project?.client_name || 'Recce images and installations for this project.') : 'Your recce images from Norrvex Partners, connected to the finished installation.'}</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="stats">{stats.map(([number, label, detail, icon]) => <div className="stat" key={label}><div><p>{label}</p><strong>{String(number).padStart(2, '0')}</strong><small>{detail}</small></div><span className="stat-icon" aria-hidden="true">{icon}</span></div>)}</div>
-        <section className="collection"><div className="collection-heading"><div><h2>{isInstallations ? 'Recce with linked installations' : 'All recce images'} <span>{visible.length}</span></h2><p>Original images and specifications, shared directly from your projects.</p></div><span className="view-label">▦ &nbsp; Gallery view</span></div>
-          <div className="toolbar"><label className="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search projects, stores, materials, or locations…" aria-label="Search recce repository" value={query} onChange={event => setQuery(event.target.value)} /></label>
-            <select aria-label="Filter project" value={projectId} onChange={event => setProjectId(event.target.value)}><option value="all">All projects</option>{data.projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select>
-            <select aria-label="Filter mapping" value={status} onChange={event => setStatus(event.target.value)}><option value="all">All mappings</option><option value="unmapped">Not mapped</option><option value="mapped">Installation linked</option></select>
+        <section className="collection"><div className="collection-heading"><div><h2>{showProjects ? 'All projects' : isInstallations ? 'Recce with linked installations' : 'Project recce images'} {!showProjects && <span>{visible.length}</span>}</h2><p>{showProjects ? 'Your project repository, shared directly from Norrvex Partners.' : 'Original images and specifications, shared directly from your projects.'}</p></div><span className="view-label">▦ &nbsp; {showProjects ? 'Projects' : 'Gallery view'}</span></div>
+          <div className="toolbar"><label className="search"><span aria-hidden="true">⌕</span><input type="search" placeholder={showProjects ? 'Search projects or clients…' : 'Search stores, materials, collateral, or locations…'} aria-label={showProjects ? 'Search projects' : 'Search recce repository'} value={query} onChange={event => setQuery(event.target.value)} /></label>
+            {isInstallations && <select aria-label="Filter project" value={projectId} onChange={event => setProjectId(event.target.value)}><option value="all">All projects</option>{data.projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select>}
+            {!showProjects && <select aria-label="Filter mapping" value={status} onChange={event => setStatus(event.target.value)}><option value="all">All mappings</option><option value="unmapped">Not mapped</option><option value="mapped">Installation linked</option></select>}
           </div>
+          {showProjects ? <ProjectGrid projects={data.projects} assets={assets} query={query} loading={loading} error={error} /> : activeProjectId && !project && !loading && !error ? <div className="empty"><h3>Project unavailable</h3><p>This project was removed or is not assigned to your account.</p><Link href="/repository">Return to your projects</Link></div> : <>
           <div className="gallery" aria-busy={loading}>
             {visible.map(asset => <button className="card" key={asset.id} onClick={() => { setSelectedId(asset.id); setMapping(false); }} aria-label={`View ${asset.title}`}>
               <div className="card-image"><AssetImage src={asset.image} alt={asset.title} />{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].map(collateral => <span key={collateral} style={{ position: 'absolute', top: 10, left: 10, background: '#fff', color: '#285b46', borderRadius: 6, padding: '5px 8px', fontSize: 11, fontWeight: 700, boxShadow: '0 2px 8px #20302020' }}>{collateral}</span>)}<span className={`badge ${asset.installations.length ? 'installed' : ''}`}>{asset.installations.length ? '● Installation linked' : '○ Not mapped'}</span></div>
@@ -123,6 +128,7 @@ export default function RepositoryWorkspace({ user, view }) {
             </button>)}
             {!visible.length && <div className="empty"><h3>{loading ? 'Loading your recce…' : error ? 'Unable to load your recce' : isInstallations ? 'No matching installation mappings' : 'No matching recce images'}</h3><p>{loading ? 'Fetching your shared project records.' : error ? 'Check the connection and use Refresh recce to retry.' : isInstallations ? 'Open a recce image and link an installation file from the same project.' : 'Recce captured in Norrvex Partners under your account will appear here. Refresh after adding recce, or adjust your filters.'}</p></div>}
           </div>
+          </>}
         </section><footer><span>norrvex_bucket <span className="footer-dot">•</span> Recce to reality.</span><span>{loading ? 'Syncing…' : error ? 'Sync failed' : `Synced ${syncedAt}`} · Source: Norrvex Partners</span></footer>
       </main>
     </div>
