@@ -8,6 +8,7 @@ import AssetImage from './AssetImage';
 import RecceDetail from './RecceDetail';
 import InstallationMapping from './InstallationMapping';
 import ProjectGrid from './ProjectGrid';
+import { formatTimestamp } from '@/lib/dates';
 import { groupRepository } from '@/lib/repository';
 import { api, jsonOptions } from '@/lib/client-api';
 
@@ -58,7 +59,12 @@ export default function RepositoryWorkspace({ user, view, activeProjectId = null
     } finally { if (generation.current === version) setLoading(false); }
   }, [handleError]);
 
-  useEffect(() => { refresh(); return () => { generation.current += 1; }; }, [refresh]);
+  useEffect(() => {
+    refresh();
+    const timer = setInterval(refresh, 60000);
+    window.addEventListener('focus', refresh);
+    return () => { generation.current += 1; clearInterval(timer); window.removeEventListener('focus', refresh); };
+  }, [refresh]);
   useEffect(() => { if (!notice) return; const timeout = setTimeout(() => setNotice(''), 4500); return () => clearTimeout(timeout); }, [notice]);
 
   async function signOut() {
@@ -86,9 +92,11 @@ export default function RepositoryWorkspace({ user, view, activeProjectId = null
     } catch (error) { handleError(error); throw error; }
   }
 
-  async function upload(projectId, file) {
+  async function upload(projectId, file, removalDate, expiryDays) {
     try {
       const body = new FormData(); body.append('type', 'installation'); body.append('file', file);
+      body.append('removal_date', removalDate);
+      body.append('project_expiry_days', expiryDays);
       const record = await api(`/api/projects/${encodeURIComponent(projectId)}/files`, { method: 'POST', body });
       setData(previous => ({ ...previous, files: [...previous.files, record] }));
       setNotice('Installation uploaded. Save the mapping to link it.');
@@ -111,8 +119,8 @@ export default function RepositoryWorkspace({ user, view, activeProjectId = null
         <Link className={`nav ${isInstallations ? 'active' : ''}`} href="/installations" aria-current={isInstallations ? 'page' : undefined}><span aria-hidden="true">⌘</span>Installation mapping</Link>
       </nav><div className="sidebar-bottom"><span className="status-dot" />Shared repository<small>Source: Norrvex Partners</small><button className="export" onClick={signOut} disabled={signingOut}>Sign out ↗</button></div>
     </aside>
-    <div className="main"><header><span>Workspace <span className="slash">/</span> <b>{title}</b></span><div className="header-account"><span className="account-email">{user.email}</span><button className="secondary mobile-logout" onClick={signOut} disabled={signingOut}>Sign out</button><span className="avatar">{(user.name || user.email).slice(0, 2).toUpperCase()}</span></div></header>
-      <main>{activeProjectId && <Link className="back-to-projects" href="/repository">← All projects</Link>}<div className="heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>{title}<span>.</span></h1><p>{showProjects ? 'Choose a project to view its recce images, specifications, and installations.' : activeProjectId ? (project?.client_name || 'Recce images and installations for this project.') : 'Your recce images from Norrvex Partners, connected to the finished installation.'}</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
+    <div className="main"><header><span>Apollo Pharmacy <span className="slash">/</span> <b>{title}</b></span><div className="header-account"><span className="account-email">{user.email}</span><button className="secondary mobile-logout" onClick={signOut} disabled={signingOut}>Sign out</button><span className="avatar">{(user.name || user.email).slice(0, 2).toUpperCase()}</span></div></header>
+      <main>{activeProjectId && <Link className="back-to-projects" href="/repository">← All projects</Link>}<div className="heading"><div><div className="eyebrow">APOLLO PHARMACY ? PROJECT WORKSPACE</div><h1>{title}<span>.</span></h1><p>{showProjects ? 'Choose a project to view its recce images, specifications, and installations.' : activeProjectId ? (project?.client_name || 'Recce images and installations for this project.') : 'Your recce images from Norrvex Partners, connected to the finished installation.'}</p></div><button className="primary" disabled={loading} onClick={refresh}>{loading ? 'Syncing…' : '↻ Refresh recce'}</button></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="stats">{stats.map(([number, label, detail, icon]) => <div className="stat" key={label}><div><p>{label}</p><strong>{String(number).padStart(2, '0')}</strong><small>{detail}</small></div><span className="stat-icon" aria-hidden="true">{icon}</span></div>)}</div>
         <section className="collection"><div className="collection-heading"><div><h2>{showProjects ? 'All projects' : isInstallations ? 'Recce with linked installations' : 'Project recce images'} {!showProjects && <span>{visible.length}</span>}</h2><p>{showProjects ? 'Your project repository, shared directly from Norrvex Partners.' : 'Original images and specifications, shared directly from your projects.'}</p></div><span className="view-label">▦ &nbsp; {showProjects ? 'Projects' : 'Gallery view'}</span></div>
@@ -124,7 +132,7 @@ export default function RepositoryWorkspace({ user, view, activeProjectId = null
           <div className="gallery" aria-busy={loading}>
             {visible.map(asset => <button className="card" key={asset.id} onClick={() => { setSelectedId(asset.id); setMapping(false); }} aria-label={`View ${asset.title}`}>
               <div className="card-image"><AssetImage src={asset.image} alt={asset.title} />{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].map(collateral => <span key={collateral} style={{ position: 'absolute', top: 10, left: 10, background: '#fff', color: '#285b46', borderRadius: 6, padding: '5px 8px', fontSize: 11, fontWeight: 700, boxShadow: '0 2px 8px #20302020' }}>{collateral}</span>)}<span className={`badge ${asset.installations.length ? 'installed' : ''}`}>{asset.installations.length ? '● Installation linked' : '○ Not mapped'}</span></div>
-              <div className="card-body"><span className="card-type">{asset.project.name}</span><h3>{asset.title}</h3><div className="spec-line"><span>Material</span><span>{[...new Set(asset.entries.map(photo => photo.material).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Collateral</span><span>{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Specifications</span><span>{asset.entries.length} {asset.entries.length === 1 ? 'entry' : 'entries'}</span></div><div className="card-footer"><span>⌖ {asset.location || asset.project.client_name || 'Location not specified'}</span><span>View details ↗</span></div></div>
+              <div className="card-body"><span className="card-type">{asset.project.name}</span><h3>{asset.title}</h3><div className="spec-line"><span>Recce added</span><span>{formatTimestamp(asset.createdAt)}</span></div><div className="spec-line"><span>Material</span><span>{[...new Set(asset.entries.map(photo => photo.material).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Collateral</span><span>{[...new Set(asset.entries.map(photo => photo.collateral).filter(Boolean))].join(', ') || 'Not specified'}</span></div><div className="spec-line"><span>Specifications</span><span>{asset.entries.length} {asset.entries.length === 1 ? 'entry' : 'entries'}</span></div><div className="card-footer"><span>⌖ {asset.location || asset.project.client_name || 'Location not specified'}</span><span>View details ↗</span></div></div>
             </button>)}
             {!visible.length && <div className="empty"><h3>{loading ? 'Loading your recce…' : error ? 'Unable to load your recce' : isInstallations ? 'No matching installation mappings' : 'No matching recce images'}</h3><p>{loading ? 'Fetching your shared project records.' : error ? 'Check the connection and use Refresh recce to retry.' : isInstallations ? 'Open a recce image and link an installation file from the same project.' : 'Recce captured in Norrvex Partners under your account will appear here. Refresh after adding recce, or adjust your filters.'}</p></div>}
           </div>

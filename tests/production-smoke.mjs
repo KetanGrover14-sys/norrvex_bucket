@@ -42,7 +42,9 @@ try {
   }
   assert.ok(ready, `Next.js did not start: ${output}`);
   const loginPage = await (await fetch(`${base}/login`)).text();
-  assert.match(loginPage, /Your work, connected/);
+  assert.match(loginPage, /Every store/);
+  assert.match(loginPage, /Apollo Pharmacy/);
+  assert.match(loginPage, /Norrvex Labs/);
   assert.match(loginPage, /name="email"/);
   assert.match(loginPage, /\/_next\/static\//);
   const protectedPage = await fetch(`${base}/repository`, { redirect: 'manual' });

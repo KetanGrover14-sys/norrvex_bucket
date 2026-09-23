@@ -74,3 +74,9 @@ Integration tests exercise the actual sibling repository authorization and Sheet
 A production build checks all pages and routes. The production smoke test starts an isolated Next.js server and fixture backend, then verifies protected redirects, login, the shared recce API, server-rendered pages, upload permissions, and logout over HTTP. Live account verification requires the actual backend URL and a working wecapurred_rr deployment.
 
 Framework reference: https://nextjs.org/docs/app/getting-started/installation
+
+## Recce, installation, and removal dates
+
+Recce and installation records display their original server-generated `created_at` timestamp in India Standard Time (IST). These represent when the image was added, not a separately entered site-work time. Installation upload forms in both apps ask for a planned removal date. That date is stored as `removal_date` (YYYY-MM-DD) on the shared `project_files` record and shown alongside each mapped installation.
+
+Deploy the updated wecapurred_rr backend and frontend, then Bucket. The partner backend automatically adds the `removal_date` column to the Google Sheets project_files tab using its existing schema initialization. Existing records remain compatible and show "Not specified" if no removal date was saved. Old clients may omit the field; the updated upload forms require it.

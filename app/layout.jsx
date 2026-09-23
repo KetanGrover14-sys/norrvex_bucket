@@ -1,12 +1,12 @@
 import './globals.css';
 
 export const metadata = {
-  title: { default: 'norrvex_bucket | Recce repository', template: '%s | norrvex_bucket' },
-  description: 'Your shared recce images, specifications, and mapped installations from Norrvex Partners.',
+  title: { default: 'Apollo Pharmacy × Norrvex Labs | Project portal', template: '%s | Apollo Pharmacy × Norrvex Labs' },
+  description: 'Apollo Pharmacy × Norrvex Labs project portal for recce images, specifications, and mapped installations.',
   robots: { index: false, follow: false },
   icons: {
-    icon: { url: '/images/norrvexlabs.png', type: 'image/png' },
-    apple: '/images/norrvexlabs.png',
+    icon: { url: '/images/Apollo.png', type: 'image/png' },
+    apple: '/images/Apollo.png',
   },
 };
 

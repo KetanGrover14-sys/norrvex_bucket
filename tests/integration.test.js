@@ -17,10 +17,11 @@ test('shared login, actual backend ownership filtering, mapping authorization, a
   // Execute the real Sheets repository code against in-memory sheet rows.
   const sheets=fs.readFileSync(path.join(upstreamRoot,'lib/sheets.js'),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
   const context=vm.createContext({process:{env:{}},tables});
+  vm.runInContext(fs.readFileSync(path.join(upstreamRoot,'lib/lifecycle.js'),'utf8').replace(/export /g,''),context);
   vm.runInContext(sheets+`;readAll=async tab=>tables[tab].map((r,i)=>({...r,_row:i+2}));appendRow=async(tab,row)=>tables[tab].push(row);deleteRow=async(tab,index)=>tables[tab].splice(index-2,1);this.api={getRepositoryData,getProjectById,getPhotoRowById,getProjectFileById,saveInstallationMapping,removeInstallationMapping};`,context);
   // Execute the actual mutation route, retaining its project/photo/file checks.
   const routeSource=fs.readFileSync(path.join(upstreamRoot,'app/api/repository/route.js'),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
-  const routes=vm.createContext({...context.api,Response,console,uuid:()=> 'mapping-'+tables.installation_mappings.length,withAuth:fn=>fn});
+  const routes=vm.createContext({...context.api,removalExpired:context.removalExpired,Response,console,uuid:()=> 'mapping-'+tables.installation_mappings.length,withAuth:fn=>fn});
   vm.runInContext(routeSource+';this.handlers={GET,POST,DELETE};',routes);
   const users={vivek:{id:'vivek',email:'vivek@example.test',name:'Vivek',role:'vendor'},other:{id:'other',email:'other@example.test',name:'Other',role:'vendor'},admin:{id:'admin',email:'admin@example.test',name:'Admin',role:'admin'}};
   const backend=http.createServer(async(req,res)=>{

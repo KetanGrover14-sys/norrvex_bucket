@@ -25,8 +25,9 @@ export default function LoginForm() {
 
   return <section className="login-screen"><div className="login-card">
     <Brand />
-    <div className="eyebrow">RECCE → INSTALLATION</div>
-    <h1>Your work, connected<span>.</span></h1>
+    <div className="eyebrow">APOLLO PHARMACY · PROJECT PORTAL</div>
+    <h1>Every store.<br />Every detail<span>.</span></h1>
+    <p className="login-intro">Your Apollo Pharmacy projects, from recce to installation. In collaboration with Norrvex Labs.</p>
     <form onSubmit={signIn}>
       <div className="form-grid">
         <label className="full">Email<input name="email" type="email" autoComplete="username" required placeholder="Your Email" /></label>
@@ -37,6 +38,6 @@ export default function LoginForm() {
       
       <button className="primary" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in to your repository ↗'}</button>
     </form>
-    <p className="login-footnote">One account. The same recce data across both websites.</p>
+    <p className="login-footnote">Apollo Pharmacy × Norrvex Labs<br />Sign in with your existing partner account.</p>
   </div></section>;
 }
