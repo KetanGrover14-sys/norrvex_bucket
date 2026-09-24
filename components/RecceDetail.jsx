@@ -37,7 +37,7 @@ export default function RecceDetail({ asset, onClose, onMap, onUnlink }) {
       <div><strong>{mapping.file.file_name}</strong><p>Recce entry {asset.entries.findIndex(photo => photo.id === mapping.photo_id) + 1} · {mapping.file.status || 'Pending review'}</p>
         <p>Uploaded by {mapping.file.uploaded_by_name || '—'}</p>
         <p><strong>Installation added:</strong> {formatTimestamp(mapping.file.created_at)}</p>
-        <p><strong>Removal date:</strong> {formatRemovalDate(mapping.file.removal_date)}{mapping.file.project_expiry_days && ` ? Project expiry: ${mapping.file.project_expiry_days} days`}</p>
+        <p><strong>Removal date:</strong> {formatRemovalDate(mapping.file.removal_date)}{mapping.file.project_expiry_days && ` | Project expiry: ${mapping.file.project_expiry_days} days`}</p>
         {safeURL(mapping.file.file_url) && <a href={safeURL(mapping.file.file_url)} target="_blank" rel="noopener noreferrer">View installation {isImage(mapping.file) ? 'image' : 'file'} ↗</a>}
       </div>
       <button className="remove" disabled={pending !== null} onClick={() => unlink(mapping)}>{pending === mapping.id ? 'Unlinking…' : 'Unlink'}</button>

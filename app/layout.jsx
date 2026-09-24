@@ -5,8 +5,8 @@ export const metadata = {
   description: 'Apollo Pharmacy × Norrvex Labs project portal for recce images, specifications, and mapped installations.',
   robots: { index: false, follow: false },
   icons: {
-    icon: { url: '/images/Apollo.png', type: 'image/png' },
-    apple: '/images/Apollo.png',
+    icon: { url: '/images/apollopharmacy.png', type: 'image/png' },
+    apple: '/images/apollopharmacy.png',
   },
 };
 
