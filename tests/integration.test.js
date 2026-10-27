@@ -50,7 +50,7 @@ test('shared login, actual backend ownership filtering, mapping authorization, a
   assert.equal(tables.installation_mappings.length,1,'Mapping is stored once in shared backend');
   const mapped=await (await request('/api/repository',vivek)).json();const groups=groupRepository(mapped);assert.equal(groups.length,1);assert.equal(groups[0].entries.length,2);assert.equal(groups[0].installations[0].file.id,'iv');
   assert.equal((await (await request('/api/repository',other)).json()).mappings.length,0);
-  assert.equal((await request('/api/projects/pv/files',vivek,'POST',{})).status,403);
+  const vendorForm=new FormData();vendorForm.append('type','installation');vendorForm.append('file',new Blob(['test-image'],{type:'image/png'}),'vendor.png');assert.equal((await fetch(base+'/api/projects/pv/files',{method:'POST',headers:{Cookie:vivek},body:vendorForm})).status,201);
   const form=new FormData();form.append('type','installation');form.append('file',new Blob(['test-image'],{type:'image/png'}),'test.png');assert.equal((await fetch(base+'/api/projects/pv/files',{method:'POST',headers:{Cookie:admin},body:form})).status,201);
   assert.equal((await fetch(base+'/api/repository',{method:'POST',headers:{Cookie:vivek,Origin:'https://unrelated.example','Content-Type':'application/json'},body:'{}'})).status,403);
   assert.equal((await request('/api/repository',vivek,'DELETE',{project_id:'pv',photo_id:'rv',file_id:'iv'})).status,200);assert.equal(tables.installation_mappings.length,0);

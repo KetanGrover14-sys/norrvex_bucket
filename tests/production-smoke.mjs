@@ -73,10 +73,10 @@ try {
   assert.match(projectPage, /All projects/);
   const installations = await (await fetch(`${base}/installations`, { headers })).text();
   assert.match(installations, /Recce with linked installations/);
-  const upload = await fetch(`${base}/api/projects/p1/files`, { method: 'POST', headers }); assert.equal(upload.status, 403);
+  const upload = await fetch(`${base}/api/projects/p1/files`, { method: 'POST', headers }); assert.notEqual(upload.status, 403, 'Vendors may upload installation files; the partner API enforces project ownership');
   const loggedOut = await fetch(`${base}/api/auth/logout`, { method: 'POST', headers: { ...headers, Origin: base } });
   assert.match(loggedOut.headers.get('set-cookie'), /Max-Age=0/);
-  console.log('PASS: Next.js production pages, protected redirects, login cookies, shared recce API, installation page, upload permissions, and logout.');
+  console.log('PASS: Next.js production pages, protected redirects, login cookies, shared recce API, installation page, vendor upload access, and logout.');
 } finally {
   server.kill();
   backend.closeAllConnections(); await new Promise(resolve => backend.close(resolve));
